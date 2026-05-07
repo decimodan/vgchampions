@@ -1,0 +1,68 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { SITE_TITLE } from "../../consts";
+import listData from "../../../data/pokemon-champions-list.json";
+
+export function getStaticPaths() {
+	return listData.pokemon.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const pokemon = listData.pokemon.find((p) => p.slug === slug);
+
+if (!pokemon) {
+	return Astro.redirect("/pokemon", 302);
+}
+
+const title = `${pokemon.name} — ${SITE_TITLE}`;
+const description = `VGC usage and builds for ${pokemon.name} (coming soon).`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} />
+	</head>
+	<body class="theme-vgc pokemon-directory">
+		<Header />
+		<main class="pokemon-page detail">
+			<p class="back">
+				<a href="/pokemon">← All Pokémon</a>
+			</p>
+			<h1 class="page-title-bar">{pokemon.name}</h1>
+			<p class="page-intro">Builds, moves, and teammates — this page is a placeholder for now.</p>
+			<img
+				class="detail-sprite"
+				src={`/pokemon-champions/sprites/${pokemon.slug}.webp`}
+				alt=""
+				width="128"
+				height="128"
+				loading="eager"
+			/>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	.pokemon-page.detail {
+		max-width: 720px;
+	}
+	.back {
+		margin: 0 0 0.5rem;
+	}
+	.back a {
+		color: var(--vgc-navy);
+		font-weight: 600;
+		text-decoration: underline;
+	}
+	.detail-sprite {
+		display: block;
+		margin-top: 1rem;
+		width: 128px;
+		height: 128px;
+		object-fit: contain;
+	}
+</style>

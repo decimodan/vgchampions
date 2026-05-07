@@ -1,0 +1,261 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE_TITLE } from "../consts";
+import listData from "../../data/pokemon-champions-list.json";
+import { typeHexFromSlug } from "../lib/pokemon-types";
+
+const title = `Pokémon stats — ${SITE_TITLE}`;
+const description =
+	"All Pokémon played in VGC, ranked by usage — browse types and usage counts.";
+
+const pokemon = [...listData.pokemon].sort((a, b) => {
+	const ua = a.usageCount ?? 0;
+	const ub = b.usageCount ?? 0;
+	if (ub !== ua) return ub - ua;
+	return a.slug.localeCompare(b.slug);
+});
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} />
+	</head>
+	<body class="theme-vgc pokemon-directory">
+		<Header />
+		<main class="pokemon-page">
+			<h1 class="page-title-bar">Pokémon Champions &amp; VGC Pokémon stats</h1>
+			<p class="page-intro">
+				Find out all the Pokémon played in Pokémon Champions &amp; VGC based on their results,
+				ranked by usage, and browse all the information about their best builds and most popular
+				teammates.
+			</p>
+
+			<div class="search-wrap">
+				<label class="sr-only" for="pokemon-search">Search Pokémon</label>
+				<input
+					id="pokemon-search"
+					class="pokemon-search"
+					type="search"
+					placeholder="Search Pokémon…"
+					autocomplete="off"
+					spellcheck="false"
+				/>
+			</div>
+
+			<div class="pokemon-grid" id="pokemon-grid">
+				{
+					pokemon.map((p) => {
+						const primarySlug = p.types[0]?.slug ?? "normal";
+						const tint = typeHexFromSlug(primarySlug);
+						const searchBlob = `${p.slug} ${p.name}`.toLowerCase();
+						return (
+							<a
+								class="poke-card"
+								href={`/pokemon/${p.slug}`}
+								data-search={searchBlob}
+								style={`--type-accent: ${tint}; --card-bg: color-mix(in srgb, ${tint} 16%, white);`}
+							>
+								<div class="poke-card__sprite">
+									<img
+										src={`/pokemon-champions/sprites/${p.slug}.webp`}
+										alt=""
+										width="96"
+										height="96"
+										loading="lazy"
+										decoding="async"
+									/>
+								</div>
+								<div class="poke-card__info">
+									<div class="poke-card__name">{p.name}</div>
+									<div class="poke-card__types">
+										{p.types.map((t) => (
+											<span
+												class="poke-card__type-badge"
+												style={`background-color: ${typeHexFromSlug(t.slug)};`}
+											>
+												{t.name}
+											</span>
+										))}
+									</div>
+									<div class="poke-card__usage">
+										{p.usageCount != null ? `${p.usageCount.toLocaleString("en-US")} uses` : "—"}
+									</div>
+								</div>
+							</a>
+						);
+					})
+				}
+			</div>
+		</main>
+		<Footer />
+		<script>
+			(() => {
+				const input = document.getElementById("pokemon-search");
+				const grid = document.getElementById("pokemon-grid");
+				if (!(input instanceof HTMLInputElement) || !grid) return;
+
+				function apply() {
+					const q = input.value.trim().toLowerCase().replace(/\s+/g, " ");
+					for (const el of grid.querySelectorAll("[data-search]")) {
+						if (!(el instanceof HTMLElement)) continue;
+						const hay = (el.getAttribute("data-search") ?? "").toLowerCase();
+						el.hidden = q.length > 0 && !hay.includes(q);
+					}
+				}
+
+				input.addEventListener("input", apply);
+				input.addEventListener("search", apply);
+			})();
+		</script>
+	</body>
+</html>
+
+<style>
+	.pokemon-directory main.pokemon-page {
+		max-width: 1200px;
+	}
+
+	.pokemon-page {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		padding-bottom: 3rem;
+	}
+
+	.page-title-bar {
+		margin: 0;
+		padding: 0.65rem 1rem;
+		background: var(--vgc-yellow);
+		border-radius: var(--vgc-radius);
+		font-size: clamp(1.15rem, 3vw, 1.35rem);
+		font-weight: 700;
+		color: #1a1a1a;
+		line-height: 1.25;
+		box-shadow: 0 2px 10px rgba(0, 45, 76, 0.08);
+	}
+
+	.page-intro {
+		margin: 0;
+		font-size: 0.98rem;
+		line-height: 1.55;
+		color: #333;
+	}
+
+	.search-wrap {
+		margin: 0;
+	}
+
+	.pokemon-search {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0.75rem 1rem;
+		font-size: 1rem;
+		font-family: inherit;
+		color: #1a1a1a;
+		background: #fff;
+		border: 2px solid var(--vgc-yellow);
+		border-radius: var(--vgc-radius);
+		outline: none;
+	}
+	.pokemon-search:focus {
+		border-color: var(--vgc-navy);
+		box-shadow: 0 0 0 2px rgba(0, 45, 76, 0.12);
+	}
+	.pokemon-search::placeholder {
+		color: #777;
+	}
+
+	.pokemon-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+	}
+
+	@media (max-width: 720px) {
+		.pokemon-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.poke-card {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.75rem 1rem;
+		background: var(--card-bg, #fff);
+		border: 1px solid rgba(0, 0, 0, 0.08);
+		border-radius: var(--vgc-radius);
+		text-decoration: none;
+		color: inherit;
+		box-shadow: 0 1px 4px rgba(0, 45, 76, 0.06);
+		transition:
+			box-shadow 0.15s ease,
+			transform 0.12s ease;
+	}
+	/* [hidden] alone loses to display:flex — must win when filtering */
+	.poke-card[hidden] {
+		display: none !important;
+	}
+	.poke-card:hover {
+		box-shadow: 0 6px 18px rgba(0, 45, 76, 0.1);
+		transform: translateY(-1px);
+	}
+	.poke-card:focus-visible {
+		outline: 2px solid var(--vgc-navy);
+		outline-offset: 2px;
+	}
+
+	.poke-card__sprite {
+		flex-shrink: 0;
+		width: 72px;
+		height: 72px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.poke-card__sprite img {
+		width: 72px;
+		height: 72px;
+		object-fit: contain;
+	}
+
+	.poke-card__info {
+		min-width: 0;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.poke-card__name {
+		font-weight: 700;
+		font-size: 1.05rem;
+		color: #111;
+		line-height: 1.2;
+	}
+
+	.poke-card__types {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+
+	.poke-card__type-badge {
+		display: inline-block;
+		padding: 0.18rem 0.5rem;
+		border-radius: 6px;
+		font-size: 0.68rem;
+		font-weight: 700;
+		text-transform: capitalize;
+		color: #fff;
+		line-height: 1.2;
+	}
+
+	.poke-card__usage {
+		font-size: 0.88rem;
+		color: #666;
+	}
+</style>

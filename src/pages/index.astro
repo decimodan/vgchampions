@@ -3,6 +3,21 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import {
+	newsItems,
+	topByUsage,
+	topPerforming,
+	recentTournaments,
+	typeColors,
+	spriteUrl,
+} from '../data/home';
+
+const navTiles = [
+	{ href: '/pokemon', title: 'Pokemon', subtitle: 'Pokédex', spriteId: 25 },
+	{ href: '/tier-list', title: 'Tier List', subtitle: 'Rankings', spriteId: 448 },
+	{ href: '/teams', title: 'Teams', subtitle: 'Top cores', spriteId: 373 },
+	{ href: '/tournaments', title: 'Tournaments', subtitle: 'Results', spriteId: 376 },
+] as const;
 ---
 
 <!doctype html>
@@ -10,41 +25,538 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
-	<body>
+	<body class="theme-vgc">
 		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+		<main class="home">
+			<section class="hero" aria-labelledby="hero-title">
+				<h1 id="hero-title" class="hero-title">Pokémon Champions &amp; VGC metagame</h1>
+				<p class="hero-lead">
+					Tournament usage, win rates, and news to track the competitive doubles format.
+				</p>
+				<nav class="nav-tiles" aria-label="Main sections">
+					{
+						navTiles.map((tile) => (
+							<a class="nav-tile" href={tile.href}>
+								<img
+									class="nav-tile-sprite"
+									src={spriteUrl(tile.spriteId)}
+									alt=""
+									width="64"
+									height="64"
+									loading="lazy"
+								/>
+								<div class="nav-tile-text">
+									<span class="nav-tile-title">{tile.title}</span>
+									<span class="nav-tile-sub">{tile.subtitle}</span>
+								</div>
+							</a>
+						))
+					}
+				</nav>
+			</section>
+
+			<section class="section" aria-labelledby="news-heading">
+				<h2 id="news-heading" class="section-bar">Latest News &amp; Events</h2>
+				<div class="news-grid">
+					{
+						newsItems.map((item) => (
+							<article class="news-card">
+								<div
+									class="news-thumb"
+									style={`background: ${item.imageGradient};`}
+									role="img"
+									aria-hidden="true"
+								/>
+								<div class="news-body">
+									<p class="news-tag">{item.tag}</p>
+									<h3 class="news-title">{item.title}</h3>
+									<p class="news-snippet">{item.snippet}</p>
+									<p class="news-date">{item.date}</p>
+									<p>
+										<span
+											class:list={[
+												'news-badge',
+												item.badge.style === 'info' && 'news-badge--info',
+												item.badge.style === 'ended' && 'news-badge--ended',
+												item.badge.style === 'countdown' && 'news-badge--countdown',
+											]}
+										>
+											{item.badge.label}
+										</span>
+									</p>
+								</div>
+							</article>
+						))
+					}
+				</div>
+				<p class="section-footer-link">
+					<a href="#">View all news</a>
+				</p>
+			</section>
+
+			<div class="two-col">
+				<section class="section" aria-labelledby="usage-heading">
+					<h2 id="usage-heading" class="section-bar">Top Pokémon by usage</h2>
+					<ul class="poke-list">
+						{
+							topByUsage.map((p) => (
+								<li class="poke-row" style={`background-color: ${p.tint};`}>
+									<img
+										class="poke-sprite"
+										src={spriteUrl(p.id)}
+										alt=""
+										width="72"
+										height="72"
+										loading="lazy"
+									/>
+									<div class="poke-info">
+										<span class="poke-name">{p.name}</span>
+										<div class="poke-types">
+											{p.types.map((t) => (
+												<span class="type-badge" style={`background:${typeColors[t]};`}>
+													{t}
+												</span>
+											))}
+										</div>
+									</div>
+									<span class="poke-stat">{p.usagePct.toFixed(1)}% usage</span>
+								</li>
+							))
+						}
+					</ul>
+					<a class="cta-btn" href="/tier-list">View popular tier list →</a>
+				</section>
+
+				<section class="section" aria-labelledby="perform-heading">
+					<h2 id="perform-heading" class="section-bar">Top performing Pokémon</h2>
+					<ul class="poke-list">
+						{
+							topPerforming.map((p) => (
+								<li class="poke-row" style={`background-color: ${p.tint};`}>
+									<img
+										class="poke-sprite"
+										src={spriteUrl(p.id)}
+										alt=""
+										width="72"
+										height="72"
+										loading="lazy"
+									/>
+									<div class="poke-info">
+										<span class="poke-name">{p.name}</span>
+										<div class="poke-types">
+											{p.types.map((t) => (
+												<span class="type-badge" style={`background:${typeColors[t]};`}>
+													{t}
+												</span>
+											))}
+										</div>
+									</div>
+									<span class="poke-stat">WR {p.winRate.toFixed(1)}%</span>
+								</li>
+							))
+						}
+					</ul>
+					<a class="cta-btn" href="/teams">Explore teams →</a>
+				</section>
+			</div>
+
+			<section class="section" aria-labelledby="tournaments-heading">
+				<h2 id="tournaments-heading" class="section-bar">Recent tournaments</h2>
+				<div class="table-wrap">
+					<table class="tourney-table">
+						<thead>
+							<tr>
+								<th scope="col">Tournament</th>
+								<th scope="col">Players</th>
+								<th scope="col">Date</th>
+								<th scope="col">Winner</th>
+							</tr>
+						</thead>
+						<tbody>
+							{
+								recentTournaments.map((row, i) => (
+									<tr class:list={[i % 2 === 1 && 'row-alt']}>
+										<td>
+											<a href={row.href}>{row.name}</a>
+										</td>
+										<td>{row.players}</td>
+										<td>{row.date}</td>
+										<td>{row.winner}</td>
+									</tr>
+								))
+							}
+						</tbody>
+					</table>
+				</div>
+				<p class="section-footer-link">
+					<a href="/tournaments">All tournaments</a>
+				</p>
+			</section>
+
+			<section class="about-block" aria-labelledby="about-heading">
+				<h2 id="about-heading" class="about-title">About Pokémon Champions</h2>
+				<p>
+					This site collects usage stats, recent results, and notes aimed at VGC players. Home page
+					numbers are sample data; you can later wire them to your own API or database.
+				</p>
+				<p>
+					<a href="/about">More about</a>
+					·
+					<a href="/blog">Blog</a>
+				</p>
+			</section>
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	.home {
+		display: flex;
+		flex-direction: column;
+		gap: 2.5rem;
+	}
+
+	.hero-title {
+		margin: 0 0 0.5rem;
+		font-size: clamp(1.75rem, 4vw, 2.25rem);
+		font-weight: 700;
+		color: var(--vgc-navy);
+		letter-spacing: -0.03em;
+		line-height: 1.2;
+	}
+
+	.hero-lead {
+		margin: 0 0 1.5rem;
+		max-width: 42rem;
+		color: #333;
+		font-size: 1rem;
+	}
+
+	.nav-tiles {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 1rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	@media (max-width: 900px) {
+		.nav-tiles {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (max-width: 480px) {
+		.nav-tiles {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.nav-tile {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1rem 1.1rem;
+		background: var(--vgc-yellow);
+		border-radius: var(--vgc-radius);
+		box-shadow: 0 4px 14px rgba(0, 45, 76, 0.12);
+		text-decoration: none;
+		color: #1a1a1a;
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+	.nav-tile:hover {
+		color: #1a1a1a;
+		transform: translateY(-2px);
+		box-shadow: 0 8px 22px rgba(0, 45, 76, 0.16);
+	}
+
+	.nav-tile-sprite {
+		flex-shrink: 0;
+		width: 56px;
+		height: 56px;
+		object-fit: contain;
+		image-rendering: pixelated;
+	}
+
+	.nav-tile-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		min-width: 0;
+	}
+
+	.nav-tile-title {
+		font-weight: 700;
+		font-size: 1.2rem;
+		letter-spacing: -0.02em;
+	}
+
+	.nav-tile-sub {
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		opacity: 0.85;
+	}
+
+	.section-bar {
+		margin: 0 0 1.25rem;
+		padding: 0.65rem 1rem;
+		background: var(--vgc-yellow);
+		border-radius: var(--vgc-radius);
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: #1a1a1a;
+	}
+
+	.news-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1.25rem;
+	}
+
+	@media (max-width: 900px) {
+		.news-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.news-card {
+		background: #fff;
+		border-radius: var(--vgc-radius);
+		overflow: hidden;
+		box-shadow: 0 2px 12px rgba(0, 45, 76, 0.08);
+	}
+
+	.news-thumb {
+		height: 140px;
+		width: 100%;
+	}
+
+	.news-body {
+		padding: 1rem 1.1rem 1.1rem;
+	}
+
+	.news-tag {
+		margin: 0 0 0.35rem;
+		font-size: 0.68rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: var(--vgc-navy);
+	}
+
+	.news-title {
+		margin: 0 0 0.5rem;
+		font-size: 1.05rem;
+		font-weight: 700;
+		color: #111;
+		line-height: 1.3;
+	}
+
+	.news-snippet {
+		margin: 0 0 0.5rem;
+		font-size: 0.9rem;
+		color: #444;
+		line-height: 1.45;
+	}
+
+	.news-date {
+		margin: 0 0 0.5rem;
+		font-size: 0.8rem;
+		color: #666;
+	}
+
+	.news-badge {
+		display: inline-block;
+		padding: 0.25rem 0.6rem;
+		border-radius: 6px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: #fff;
+	}
+	.news-badge--info {
+		background: #2563eb;
+	}
+	.news-badge--ended {
+		background: #dc2626;
+	}
+	.news-badge--countdown {
+		background: #ea580c;
+	}
+
+	.section-footer-link {
+		margin: 1rem 0 0;
+		font-size: 0.95rem;
+	}
+	.section-footer-link a {
+		color: var(--vgc-navy);
+		font-weight: 600;
+		text-decoration: underline;
+	}
+	.section-footer-link a:hover {
+		color: var(--vgc-navy);
+	}
+
+	.two-col {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.5rem;
+		align-items: start;
+	}
+
+	@media (max-width: 900px) {
+		.two-col {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.poke-list {
+		list-style: none;
+		margin: 0 0 1rem;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
+	}
+
+	.poke-row {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		padding: 0.6rem 0.85rem;
+		border-radius: var(--vgc-radius);
+		box-shadow: 0 1px 6px rgba(0, 45, 76, 0.06);
+	}
+
+	.poke-sprite {
+		flex-shrink: 0;
+		width: 56px;
+		height: 56px;
+		object-fit: contain;
+	}
+
+	.poke-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.poke-name {
+		display: block;
+		font-weight: 700;
+		font-size: 1rem;
+		color: #111;
+	}
+
+	.poke-types {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		margin-top: 0.35rem;
+	}
+
+	.type-badge {
+		display: inline-block;
+		padding: 0.12rem 0.45rem;
+		border-radius: 4px;
+		font-size: 0.65rem;
+		font-weight: 700;
+		text-transform: capitalize;
+		color: #fff;
+		line-height: 1.2;
+	}
+
+	.poke-stat {
+		flex-shrink: 0;
+		font-weight: 700;
+		font-size: 0.95rem;
+		color: var(--vgc-navy);
+	}
+
+	.cta-btn {
+		display: block;
+		width: 100%;
+		text-align: center;
+		padding: 0.75rem 1rem;
+		background: var(--vgc-yellow);
+		color: #1a1a1a;
+		font-weight: 700;
+		font-size: 0.95rem;
+		border-radius: var(--vgc-radius);
+		text-decoration: none;
+		box-shadow: 0 2px 10px rgba(0, 45, 76, 0.1);
+		transition:
+			transform 0.12s ease,
+			box-shadow 0.12s ease;
+	}
+	.cta-btn:hover {
+		color: #1a1a1a;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 14px rgba(0, 45, 76, 0.14);
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+		border-radius: var(--vgc-radius);
+		box-shadow: 0 2px 12px rgba(0, 45, 76, 0.08);
+	}
+
+	.tourney-table {
+		width: 100%;
+		border-collapse: collapse;
+		background: #fff;
+		font-size: 0.95rem;
+	}
+
+	.tourney-table thead th {
+		background: var(--vgc-navy);
+		color: #fff;
+		text-align: left;
+		padding: 0.75rem 1rem;
+		font-weight: 600;
+	}
+
+	.tourney-table tbody td {
+		padding: 0.7rem 1rem;
+		border-bottom: 1px solid #eee;
+	}
+
+	.tourney-table tbody tr:last-child td {
+		border-bottom: none;
+	}
+
+	.tourney-table tbody tr.row-alt td {
+		background: #f3f3f3;
+	}
+
+	.tourney-table a {
+		color: var(--vgc-navy);
+		font-weight: 600;
+		text-decoration: underline;
+	}
+
+	.about-block {
+		padding: 1.5rem 1.25rem;
+		background: #fff;
+		border-radius: var(--vgc-radius);
+		box-shadow: 0 2px 12px rgba(0, 45, 76, 0.06);
+	}
+	.about-title {
+		margin: 0 0 0.75rem;
+		font-size: 1.15rem;
+		color: var(--vgc-navy);
+	}
+	.about-block p {
+		margin: 0 0 0.75rem;
+		font-size: 0.95rem;
+		color: #444;
+	}
+	.about-block a {
+		color: var(--vgc-navy);
+		font-weight: 600;
+	}
+</style>

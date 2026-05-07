@@ -1,0 +1,23 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+const title = `Teams — ${SITE_TITLE}`;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={title} description="Team cores and rentals (coming soon)." />
+	</head>
+	<body class="theme-vgc">
+		<Header />
+		<main>
+			<h1>Teams</h1>
+			<p>This section is coming soon.</p>
+			<p><a href="/">← Back home</a></p>
+		</main>
+		<Footer />
+	</body>
+</html>

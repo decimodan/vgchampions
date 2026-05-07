@@ -33,7 +33,10 @@
 		"check": "astro build && tsc && wrangler deploy --dry-run",
 		"deploy": "wrangler deploy",
 		"dev": "astro dev",
-		"preview": "astro build && wrangler dev"
+		"preview": "astro build && wrangler dev",
+		"data:pokemon": "node scripts/parse-pokemon-html.mjs",
+		"data:pokemon:api": "node scripts/build-pokemon-api-json.mjs",
+		"data:pokemon:sprites": "node scripts/download-pokemon-sprites.mjs"
 	},
 	"type": "module"
 }
